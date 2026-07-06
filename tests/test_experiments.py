@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from routing_project.experiments import CSV_FIELDS, ExperimentConfig, run_experiment
+from routing_project.experiments import CSV_FIELDS, ExperimentConfig, run_experiment, run_parameter_sweep
 
 
 class ExperimentTests(unittest.TestCase):
@@ -24,6 +24,14 @@ class ExperimentTests(unittest.TestCase):
             self.assertEqual(len(rows), 4)
             header = output.read_text(encoding="utf-8").splitlines()[0].split(",")
             self.assertEqual(header, CSV_FIELDS)
+
+    def test_parameter_sweep_can_run_at_small_scale(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "sweep.csv"
+            rows = run_parameter_sweep(output, node_count=12, trials=1, iterations=2)
+
+            self.assertTrue(output.exists())
+            self.assertEqual(len(rows), 27)
 
 
 if __name__ == "__main__":

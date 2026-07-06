@@ -66,6 +66,13 @@ Harmony Search parameter sweep:
 python -m routing_project.cli run-sweep
 ```
 
+The default sweep tests all HMCR/PAR/HMS combinations at 500 nodes with 3
+trials and 100 iterations per trial. For a larger final-analysis run:
+
+```powershell
+python -m routing_project.cli run-sweep --trials 10 --iterations 250
+```
+
 Larger checkpoint grid:
 
 ```powershell

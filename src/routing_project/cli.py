@@ -26,6 +26,9 @@ def main(argv: list[str] | None = None) -> int:
 
     sweep = subparsers.add_parser("run-sweep", help="Run the Harmony Search parameter sweep.")
     sweep.add_argument("--output", type=Path, default=RAW_DIR / "harmony_parameter_sweep.csv")
+    sweep.add_argument("--nodes", type=int, default=500, help="Number of graph nodes for the sweep.")
+    sweep.add_argument("--trials", type=int, default=3, help="Trials per parameter combination.")
+    sweep.add_argument("--iterations", type=int, default=100, help="Harmony Search iterations per trial.")
 
     charts = subparsers.add_parser("make-charts", help="Create SVG charts from a CSV result file.")
     charts.add_argument("--input", type=Path, default=RAW_DIR / "small_experiment.csv")
@@ -40,7 +43,13 @@ def main(argv: list[str] | None = None) -> int:
         rows = run_experiment(CHECKPOINT_CONFIG, args.output)
         print(f"Wrote {len(rows)} rows to {args.output}")
     elif args.command == "run-sweep":
-        rows = run_parameter_sweep(args.output)
+        rows = run_parameter_sweep(
+            args.output,
+            node_count=args.nodes,
+            trials=args.trials,
+            iterations=args.iterations,
+            progress=True,
+        )
         print(f"Wrote {len(rows)} rows to {args.output}")
     elif args.command == "make-charts":
         outputs = make_charts(args.input, args.output_dir)

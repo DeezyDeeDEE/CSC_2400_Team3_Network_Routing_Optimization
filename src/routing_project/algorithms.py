@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
 import heapq
 import math
@@ -191,28 +192,30 @@ def harmony_search(
     memory = [_random_valid_path(graph, source, target, rng) for _ in range(hms)]
     memory = [path for path in memory if path]
     if not memory:
-        return AlgorithmResult(
-            "harmony_search",
-            [],
-            math.inf,
-            _elapsed_ms(start),
-            False,
-            {"error": "no valid initial harmony"},
-        )
+        fallback = _unweighted_path(graph, source, target)
+        if fallback:
+            memory.append(fallback)
+    if not memory:
+        return AlgorithmResult("harmony_search", [], math.inf, _elapsed_ms(start), False, {"error": "no valid path"})
 
     memory.sort(key=graph.path_cost)
     convergence = [graph.path_cost(memory[0])]
+    node_count = len(graph.nodes())
+    successor_map = _memory_successor_map(memory)
 
     for _ in range(iterations):
-        candidate = _improvise_path(graph, source, target, memory, hmcr, par, rng)
+        candidate = _improvise_path(graph, source, target, successor_map, node_count, hmcr, par, rng)
         if not candidate:
             candidate = _random_valid_path(graph, source, target, rng)
+        if not candidate:
+            candidate = _unweighted_path(graph, source, target)
         if not candidate:
             convergence.append(convergence[-1])
             continue
         if graph.path_cost(candidate) < graph.path_cost(memory[-1]):
             memory[-1] = candidate
             memory.sort(key=graph.path_cost)
+            successor_map = _memory_successor_map(memory)
         convergence.append(graph.path_cost(memory[0]))
 
     best = memory[0]
@@ -233,16 +236,26 @@ def harmony_search(
     )
 
 
-def _random_valid_path(graph: WeightedGraph, source: int, target: int, rng: random.Random) -> list[int]:
-    stack: list[tuple[int, list[int], set[int]]] = [(source, [source], {source})]
-    while stack:
-        node, path, visited = stack.pop()
-        if node == target:
+def _random_valid_path(
+    graph: WeightedGraph,
+    source: int,
+    target: int,
+    rng: random.Random,
+    max_attempts: int = 12,
+) -> list[int]:
+    max_steps = max(2, len(graph.nodes()))
+    for _ in range(max_attempts):
+        path = [source]
+        visited = {source}
+        while path[-1] != target and len(path) <= max_steps:
+            neighbors = [edge.to for edge in graph.neighbors(path[-1]) if edge.to not in visited or edge.to == target]
+            if not neighbors:
+                break
+            next_node = rng.choice(neighbors)
+            path.append(next_node)
+            visited.add(next_node)
+        if path[-1] == target:
             return path
-        neighbors = [edge.to for edge in graph.neighbors(node) if edge.to not in visited]
-        rng.shuffle(neighbors)
-        for next_node in neighbors:
-            stack.append((next_node, path + [next_node], visited | {next_node}))
     return []
 
 
@@ -250,7 +263,8 @@ def _improvise_path(
     graph: WeightedGraph,
     source: int,
     target: int,
-    memory: list[list[int]],
+    successor_map: dict[int, list[int]],
+    node_count: int,
     hmcr: float,
     par: float,
     rng: random.Random,
@@ -258,13 +272,13 @@ def _improvise_path(
     path = [source]
     visited = {source}
 
-    while path[-1] != target and len(path) <= len(graph.nodes()):
+    while path[-1] != target and len(path) <= node_count:
         current = path[-1]
         available = [edge for edge in graph.neighbors(current) if edge.to not in visited or edge.to == target]
         if not available:
             return []
 
-        memory_options = _memory_successors(memory, current, visited, target)
+        memory_options = [node for node in successor_map.get(current, []) if node not in visited or node == target]
         if memory_options and rng.random() < hmcr:
             next_node = rng.choice(memory_options)
         else:
@@ -279,11 +293,32 @@ def _improvise_path(
     return path if path[-1] == target else []
 
 
-def _memory_successors(memory: list[list[int]], current: int, visited: set[int], target: int) -> list[int]:
-    successors: list[int] = []
+def _memory_successor_map(memory: list[list[int]]) -> dict[int, list[int]]:
+    successors: dict[int, list[int]] = {}
     for harmony in memory:
         for index, node in enumerate(harmony[:-1]):
             candidate = harmony[index + 1]
-            if node == current and (candidate not in visited or candidate == target):
-                successors.append(candidate)
+            successors.setdefault(node, []).append(candidate)
     return successors
+
+
+def _unweighted_path(graph: WeightedGraph, source: int, target: int) -> list[int]:
+    queue: deque[int] = deque([source])
+    previous: dict[int, int | None] = {source: None}
+    while queue:
+        node = queue.popleft()
+        if node == target:
+            break
+        for edge in graph.neighbors(node):
+            if edge.to not in previous:
+                previous[edge.to] = node
+                queue.append(edge.to)
+    if target not in previous:
+        return []
+    path = [target]
+    while previous[path[-1]] is not None:
+        parent = previous[path[-1]]
+        if parent is not None:
+            path.append(parent)
+    path.reverse()
+    return path

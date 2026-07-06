@@ -90,16 +90,24 @@ def run_experiment(config: ExperimentConfig, output_csv: Path) -> list[dict[str,
     return rows
 
 
-def run_parameter_sweep(output_csv: Path) -> list[dict[str, object]]:
+def run_parameter_sweep(
+    output_csv: Path,
+    node_count: int = 500,
+    trials: int = 3,
+    iterations: int = 100,
+    progress: bool = False,
+) -> list[dict[str, object]]:
     """Run the Harmony Search parameter sweep from the checkpoint-one plan."""
 
-    graph = generate_connected_graph(500, density="moderate", seed=101)
-    source, target = 0, 499
+    graph = generate_connected_graph(node_count, density="moderate", seed=101)
+    source, target = 0, node_count - 1
     rows: list[dict[str, object]] = []
     for hmcr in (0.7, 0.8, 0.9):
         for par in (0.1, 0.3, 0.5):
             for hms in (10, 30, 50):
-                for trial in range(10):
+                if progress:
+                    print(f"Sweeping HMCR={hmcr}, PAR={par}, HMS={hms}")
+                for trial in range(trials):
                     result = harmony_search(
                         graph,
                         source,
@@ -107,14 +115,14 @@ def run_parameter_sweep(output_csv: Path) -> list[dict[str, object]]:
                         hmcr=hmcr,
                         par=par,
                         hms=hms,
-                        iterations=250,
+                        iterations=iterations,
                         seed=10_000 + trial,
                     )
                     rows.append(
                         result_to_row(
                             result,
                             graph,
-                            "v500_moderate_seed101",
+                            f"v{node_count}_moderate_seed101",
                             "moderate",
                             source,
                             target,
