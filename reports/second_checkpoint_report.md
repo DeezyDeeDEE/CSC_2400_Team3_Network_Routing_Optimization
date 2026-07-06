@@ -83,6 +83,3 @@ trials can produce many experiment runs. The next step is to run the small
 experiment first, confirm the outputs, then run the larger checkpoint grid and
 parameter sweep as time allows.
 
-Before the final submission, the team should add final charts to the report,
-analyze where Harmony Search approaches Dijkstra's path cost, and explain
-whether its runtime tradeoff is worthwhile for the graph sizes tested.
