@@ -1,2 +1,0 @@
-algorithm,edges,nodes,load_time_seconds,algorithm_time_seconds,total_time_seconds,source,target,distance,path_length
-Bellman-Ford,100000,61209,0.0839404,0.0615146,0.145455,0,61208,3,4
