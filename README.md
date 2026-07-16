@@ -4,10 +4,10 @@ This project will use Dijkstra's, Bellman Ford, A*, and Harmoncy search as the c
 be comparing the efficiency between C++ algorithms and Python algorithms as well.
 
 ## Team
-- Spencer- Organizer
-- Aaron- Python Collaborator
-- Derek- Python Collaborator
-- Tate- C++ Collaborator
+- Spencer Kirksey- Organizer
+- Aaron Werth- Python Collaborator
+- Derek Nelson- Python Collaborator
+- Alan Tate- C++ Collaborator
 
 ## Structure
 - `/Python Folder/Aaron Files/`: Code from Aaron and his graphs, results, and his implementation of the algorithm's
