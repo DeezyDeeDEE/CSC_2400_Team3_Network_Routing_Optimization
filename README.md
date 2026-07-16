@@ -1,4 +1,4 @@
-# CSC_2400_Team3_Network_Routing_Optimization
+# Network_Routing_Optimization
 The purpose of this project is compare algorithms on weighted graphs with 4 different algorithms.
 This project will use Dijkstra's, Bellman Ford, A*, and Harmoncy search as the comparisons. We will also
 be comparing the efficiency between C++ algorithms and Python algorithms as well.
