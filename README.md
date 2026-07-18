@@ -5,9 +5,9 @@ be comparing the efficiency between C++ algorithms and Python algorithms as well
 
 ## Team
 - Spencer Kirksey- Organizer
-- Aaron Werth- Python Collaborator
-- Derek Nelson- Python Collaborator
-- Alan Tate- C++ Collaborator
+- Aaron Werth(https://github.com/awwerth42)- Python Collaborator
+- Derek Nelson(https://github.com/Nex-png)- Python Collaborator
+- Alan Tate(https://github.com/Reaper51322)- C++ Collaborator
 
 ## Structure
 - `/Python Folder/Aaron Files/`: Code from Aaron and his graphs, results, and his implementation of the algorithm's
